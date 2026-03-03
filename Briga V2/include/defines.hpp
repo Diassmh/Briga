@@ -41,10 +41,10 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS MOTORES
 
-#define Motor_Direito_Positivo   17      
-#define Motor_Direito_Negativo   16      
-#define Motor_Esquerdo_Positivo  18            
-#define Motor_Esquerdo_Negativo  19      
+#define Motor_Direito_Positivo   17        //17
+#define Motor_Direito_Negativo   16        //16
+#define Motor_Esquerdo_Positivo  19        //19    
+#define Motor_Esquerdo_Negativo  18        //18
 
 #pragma endregion
 
@@ -85,8 +85,8 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 #define jSumoF 34
 #define jSumoD 36
 #define jSumoE 39
-#define receptorF 27
-#define receptorD 4
+#define receptorF 4
+#define receptorD 27
 #define receptorE 23
 
 #pragma endregion
@@ -114,7 +114,7 @@ enum SelecionaBusca {Ofensiva, Defensiva, ApenasIR};
 Direction        lado            = esquerda;
 Bandeira         lado_Bandeira   = B_Direita;
 Transistor       transistor      = Ligado;
-SelecionaModo    modoSelecionado = NaoSelecionado;
+SelecionaModo    modoSelecionado = ModoRc;
 SelecionaBusca   ModoBusca       = Ofensiva;
 
 volatile bool valorJsumoF, valorJsumoE, valorJsumoD;
@@ -124,6 +124,8 @@ char BT = 'A';          // char que é recebida pelo bluetooth
 char estrategia = 'A';  // estratégia de início da luta (qualquer caractere)
 bool running_Sensors = false;  
 bool atacando = false;
+bool flagPrimeiraVez = true; // Busca IR
+unsigned long tempoInicioIR; 
 unsigned long inicioDoAtaque = 0;
 unsigned long inicioDefensivo = 0;
 

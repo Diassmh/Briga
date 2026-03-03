@@ -23,11 +23,12 @@ bool ativarMira = false;
 
 float coefAtenuacao = 1.8; // Atenuacao da velocidade em curvas (deve ser FLOAT)
 float coefReverse = 0.9;   // Coeficiente para balancear a re (deve ser FLOAT)
-float limiteCurva = 200;   // Velocidade limite em curvas puras (deve ser FLOAT)
+float limiteCurva = 140.0;   // Velocidade limite em curvas puras (deve ser FLOAT)
 
 const char *BRIGA = "7c:9e:bd:fb:83:80";
 const char *RESSACA = "a4:f0:0f:68:e7:f0";
 const char *FUEGO = "b0:cb:d8:03:a6:88";
+const char *CAIPORA = "a4:f0:0f:69:bc:c0";
 
 #pragma region Setup RC
 
@@ -59,23 +60,27 @@ void loopRC()
             digitalWrite(led, HIGH);
             int velocidadeEsquerda = 0; // Velocidade do motor esquerdo
             int velocidadeDireita = 0;  // Velocidade do motor direito
-
             // ======================= || COMANDOS COM BOTÕES (MACROS) || ===================
 
             if (PS4.Cross())
             { // X = Frentão
-                moverMotores(255, 255);
+                moverMotores(240, 255);
                 vTaskDelay(pdMS_TO_TICKS(50));
                 continue;
             }
-
+    
+            else if (PS4.R1())
+            { 
+                moverMotores(0,0);
+                vTaskDelay(pdMS_TO_TICKS(50));
+                continue; 
+            }
             else if (PS4.Left() > 0)
             {
-
                 moverMotores(-255, 255); // Gira para a esquerda
                 vTaskDelay(pdMS_TO_TICKS(50));
                 moverMotores(255, 255); // Anda para frente
-                vTaskDelay(pdMS_TO_TICKS(150));
+                vTaskDelay(pdMS_TO_TICKS(100));
                 moverMotores(255, -255); // Gira para a direita
                 vTaskDelay(pdMS_TO_TICKS(90));
                 moverMotores(255, 255); // Anda para frente
@@ -88,11 +93,10 @@ void loopRC()
             else if (PS4.Right() > 0)
             {
                 vTaskDelay(pdMS_TO_TICKS(10)); // Delay para garantir o fim da logica anterior
-
                 moverMotores(255, -255); // Gira para a direita
                 vTaskDelay(pdMS_TO_TICKS(50));
                 moverMotores(255, 255); // Anda para frente
-                vTaskDelay(pdMS_TO_TICKS(150));
+                vTaskDelay(pdMS_TO_TICKS(100));
                 moverMotores(-255, 255); // Gira para a esquerda
                 vTaskDelay(pdMS_TO_TICKS(90));
                 moverMotores(255, 255); // Anda para frente
@@ -102,7 +106,18 @@ void loopRC()
                 moverMotores(0, 0);
                 vTaskDelay(pdMS_TO_TICKS(10));
             }
+            else if (PS4.Down() > 0)
+            {
+               vTaskDelay(pdMS_TO_TICKS(10));
+               moverMotores(-255,-255);
+               vTaskDelay(pdMS_TO_TICKS(10));
+               moverMotores(-255,0);
+               vTaskDelay(pdMS_TO_TICKS(350));
+               moverMotores(0,0);
+               vTaskDelay(pdMS_TO_TICKS(10));
 
+
+            }
             else if (PS4.Square() && !ativarMira)
             {
                 ativarMira = true;
@@ -184,18 +199,18 @@ void loopRC()
                     velocidadeEsquerda = 0;
                     velocidadeDireita = 0;
 
-                    // Se os gatilhos estao parados, verifica se o analogico quer girar
                     if (direcao < -zonaMorta)
                     { // Curva pra esquerda parado
-                        velocidadeEsquerda = -int((limiteCurva / 255) * (abs(direcao)));
-                        velocidadeDireita = int((limiteCurva / 255) * (abs(direcao)));
+                        int velCurva = map(abs(direcao), zonaMorta, 128, 0, limiteCurva);
+                        velocidadeEsquerda = -velCurva;
+                        velocidadeDireita = velCurva;
                     }
                     else if (direcao > zonaMorta)
                     { // Curva pra direita parado
-                        velocidadeEsquerda = int((limiteCurva / 255) * (abs(direcao)));
-                        velocidadeDireita = -int((limiteCurva / 255) * (abs(direcao)));
+                        int velCurva = map(direcao, zonaMorta, 127, 0, limiteCurva);
+                        velocidadeEsquerda = velCurva;
+                        velocidadeDireita = -velCurva;
                     }
-                    // Se nem gatilho nem analogico estiverem ativos, as velocidades continuam 0.
                 }
 
                 //===================== || GATILHOS PUROS || =============================

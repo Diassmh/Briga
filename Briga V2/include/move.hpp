@@ -36,29 +36,37 @@ void moverMotores(int velEsq, int velDir)
     }
 
     // --- ACIONAMENTO MOTOR DIREITO ---
-    if (velDir >= 0)
+    if (velDir > 0)
     { 
         analogWrite(Motor_Direito_Positivo, abs(velDir)); 
         analogWrite(Motor_Direito_Negativo, LOW);         
     }
-    else
+    else if (velDir < 0)
     { 
         analogWrite(Motor_Direito_Negativo, abs(velDir)); 
         analogWrite(Motor_Direito_Positivo, LOW);
     }
+    else if (velDir == 0){
+        analogWrite(Motor_Direito_Positivo, 127);
+        analogWrite(Motor_Direito_Negativo, 127);
+    }
 
     // --- ACIONAMENTO MOTOR ESQUERDO ---
-    if (velEsq >= 0)
+    if (velEsq > 0)
     { 
         analogWrite(Motor_Esquerdo_Positivo, abs(velEsq)); 
         analogWrite(Motor_Esquerdo_Negativo, LOW);
     }
-    else
+    else if (velEsq < 0)
     { 
         analogWrite(Motor_Esquerdo_Negativo, abs(velEsq)); 
         analogWrite(Motor_Esquerdo_Positivo, LOW);
     }
 
+    else if (velEsq == 0){
+        analogWrite(Motor_Esquerdo_Positivo, 127);
+        analogWrite(Motor_Esquerdo_Negativo, 127);
+    }
     // Atualiza o histórico para o próximo ciclo
     ultimaVelEsq = velEsq;
     ultimaVelDir = velDir;
@@ -83,8 +91,8 @@ void buscaOfensiva()
         unsigned long tempoDeAtaque = millis() - inicioDoAtaque;
 
         // Define a velocidade máxima baseado no tempo do ciclo do ataque
-        int velMax = (tempoDeAtaque < 150) ? 127 : 255;
-        int velReduzida = velMax / 1.5;
+        int velMax = (tempoDeAtaque < 180) ? 127 : 255;
+        int velReduzida = velMax / 2;
 
         // 1. Oponente Centralizado
         if (valorJsumoF == HIGH && (valorJsumoE == HIGH && valorJsumoD == HIGH))
@@ -94,25 +102,25 @@ void buscaOfensiva()
         // 2. Oponente na Diagonal Direita
         else if (valorJsumoF == HIGH && valorJsumoD == HIGH)
         {
-            if (tempoDeAtaque < 100)
+            if (tempoDeAtaque < 300)
             {
                 moverMotores(velMax, velReduzida);
             }
             else
             {
-                moverMotores(255, 255);
+                moverMotores(velMax, velMax);
             }
         }
         // 3. Oponente na Diagonal Esquerda
         else if (valorJsumoF == HIGH && valorJsumoE == HIGH)
         {
-            if (tempoDeAtaque < 100)
+            if (tempoDeAtaque < 300)
             {
                 moverMotores(velReduzida, velMax);
             }
             else
             {
-                moverMotores(255, 255);
+                moverMotores(velMax, velMax);
             }
         }
         // 4. Oponente apenas na frente
@@ -138,11 +146,11 @@ void buscaOfensiva()
 
         if (lado == direita)
         {
-            moverMotores(100, -100);
+            moverMotores(90, -90);
         }
         else if (lado == esquerda)
         {
-            moverMotores(-100, 100);
+            moverMotores(-90, 90);
         }
     }
 }
@@ -168,7 +176,7 @@ void buscaDefensiva()
        unsigned long tempoAtual = millis();
 
        
-        if (tempoAtual - tempoInicioCego > 300)
+        if (tempoAtual - tempoInicioCego > 200)
         {
             arcoParaEsquerda = !arcoParaEsquerda; // Inverte o booleano (true vira false, e vice-versa)
             tempoInicioCego = tempoAtual;         // Zera o cronômetro para iniciar o novo arco
@@ -192,6 +200,18 @@ void buscaDefensiva()
 
 void buscaIR()
 {
+    
+    if (flagPrimeiraVez){
+        tempoInicioIR = millis(); 
+        flagPrimeiraVez = false;
+    }   
+    
+    if (millis() - tempoInicioIR > 5000)
+    {
+       digitalWrite(Pino_Transistor,HIGH); 
+       ModoBusca = Ofensiva;
+    }
+
     if (valorReceptorF == LOW || valorReceptorE == LOW || valorReceptorD == LOW)
     {
         if (!atacando)
@@ -203,8 +223,8 @@ void buscaIR()
         unsigned long tempoDeAtaque = millis() - inicioDoAtaque;
 
         // Define a velocidade máxima baseado no tempo do ciclo do ataque
-        int velMax = (tempoDeAtaque < 150) ? 127 : 255;
-        int velReduzida = velMax / 1.5;
+        int velMax = (tempoDeAtaque < 200) ? 127 : 255;
+        int velReduzida = velMax / 2;
 
         // 1. Oponente Centralizado
         if (valorReceptorF == LOW && (valorReceptorE == LOW && valorReceptorD == LOW))
@@ -214,7 +234,7 @@ void buscaIR()
         // 2. Oponente na Diagonal Direita
         else if (valorReceptorF == LOW && valorReceptorD == LOW)
         {
-            if (tempoDeAtaque < 100)
+            if (tempoDeAtaque < 300)
             {
                 moverMotores(velMax, velReduzida);
             }
@@ -226,7 +246,7 @@ void buscaIR()
         // 3. Oponente na Diagonal Esquerda
         else if (valorReceptorF == LOW && valorReceptorE == LOW)
         {
-            if (tempoDeAtaque < 100)
+            if (tempoDeAtaque < 300)
             {
                 moverMotores(velReduzida, velMax);
             }

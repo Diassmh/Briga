@@ -27,6 +27,9 @@ void config()
     pinMode(jSumoF, INPUT);
     pinMode(jSumoE, INPUT);
     pinMode(jSumoD, INPUT);
+    pinMode(receptorF, INPUT);
+    pinMode(receptorE, INPUT);
+    pinMode(receptorD, INPUT);
 
     // --- LEDS e EXTRAS ---
     pinMode(led, OUTPUT);
@@ -42,9 +45,9 @@ void config()
     servoBandeira.setPeriodHertz(SERVO_FREQ_HZ);
     servoBandeira.attach(SERVOMOTOR_PIN, SERVO_MIN_PULSE_US, SERVO_MAX_PULSE_US);
     servoBandeira.write(SERVO_ANGULO_INICIAL);
-    vTaskDelay(pdMS_TO_TICKS(150));
+    vTaskDelay(pdMS_TO_TICKS(200));
     servoBandeira.detach();
-    servoBandeira.attach(SERVOMOTOR_PIN, SERVO_MIN_PULSE_US, SERVO_MAX_PULSE_US);
+    
 }
 
 #pragma endregion

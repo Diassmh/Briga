@@ -129,6 +129,7 @@ void setupAuto()
                 }
                 else if(BT == 'R')
                 {
+                    running_Sensors = true;
                     digitalWrite(Pino_Transistor,LOW);
                     transistor = Desligado;
                     for (;;)
@@ -179,6 +180,7 @@ void setupAuto()
             if (IrReceiver.decodedIRData.command == botao2) // se Recebermos 2
             {
                 running_Sensors = true;
+                servoBandeira.attach(SERVOMOTOR_PIN, SERVO_MIN_PULSE_US, SERVO_MAX_PULSE_US);
                 digitalWrite(led, LOW);
                 break;
             }
@@ -228,14 +230,14 @@ void setupAuto()
         moverMotores(228, 228);
         delay(12);
         moverMotores(255, 255);
-        delay(54);
+        delay(90);
         break;
 
     case 'F': // Frentão Anti Pescador 1/2 dohyo
 
         SerialBT.print("FRENTAO BOLADO");
         moverMotores(255, 255);
-        delay(100);
+        delay(150);
         break;
 
     case 'b': // Costas
@@ -256,7 +258,7 @@ void setupAuto()
             moverMotores(-255, 255);
             delay(50);
             moverMotores(255, 255);
-            delay(100);
+            delay(160);
             moverMotores(0, 0);
             delay(10);
             lado = direita;
@@ -269,7 +271,7 @@ void setupAuto()
             moverMotores(255, -255);
             delay(50);
             moverMotores(255, 255);
-            delay(100);
+            delay(160);
             moverMotores(0, 0);
             delay(10);
             lado = esquerda;
@@ -283,7 +285,7 @@ void setupAuto()
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
-            delay(40);
+            delay(50);
             moverMotores(255, 255);
             delay(90);
             moverMotores(0, 0);
@@ -294,7 +296,7 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(255, -255);
-            delay(40);
+            delay(50);
             moverMotores(255, 255);
             delay(90);
             moverMotores(0, 0);
@@ -310,9 +312,9 @@ void setupAuto()
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
-            delay(55);
+            delay(60);
             moverMotores(255, 255);
-            delay(140);
+            delay(160);
             moverMotores(255, -255);
             delay(25);
             moverMotores(0, 0);
@@ -323,9 +325,9 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(255, -255);
-            delay(55);
+            delay(60);
             moverMotores(255, 255);
-            delay(140);
+            delay(160);
             moverMotores(-255, 255);
             delay(25);
             moverMotores(0, 0);
@@ -334,40 +336,20 @@ void setupAuto()
             break;
         }
     case 'z': // Defensivo
-
         SerialBT.print("Defensivo");
-        while (true)
-        {
-            if (valorJsumoF == HIGH && valorJsumoE == HIGH && valorJsumoD == HIGH)
-            {
-                break;
-            }
-            else if (valorJsumoF == HIGH)
-            {
-                moverMotores(30, 30);
-            }
-            else
-            {
-                if (lado == esquerda)
-                    moverMotores(-70, 70);
-                else if (lado == direita)
-                    moverMotores(70, -70);
-            }
-            vTaskDelay(5);
-        }
         break;
 
     case 'e': // desempate
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
-            delay(110);
+            delay(130);
             break;
         }
         else if (lado == direita)
         {
             moverMotores(255, -255);
-            delay(110);
+            delay(140);
             break;
         }
     case 'v':
@@ -410,14 +392,14 @@ void setupAuto()
         bool flagM = false;
         bool giroEsquerda = false, giroDireita = false;
 
-        vTaskDelay(pdMS_TO_TICKS(80)); // Espera 40ms
+        vTaskDelay(pdMS_TO_TICKS(80)); // Espera 80ms
         while (!flagM)
         {
             if (lado == esquerda)
             {
                 servoBandeira.write(180); // Bandeira cai para a esquerda
                 moverMotores(255, -255);
-                delay(75);
+                delay(60);
                 giroEsquerda = true;
                 giroDireita = false;
                 flagM = true;
@@ -426,7 +408,7 @@ void setupAuto()
             {
                 servoBandeira.write(0); // Bandeira cai para a direita
                 moverMotores(-255, 255);
-                delay(75);
+                delay(60);
                 giroDireita = true;
                 giroEsquerda = false;
                 flagM = true;
@@ -466,6 +448,8 @@ void setupAuto()
             delay(150);
             moverMotores(0, 0);
             delay(10);
+            moverMotores(255,-255);
+            delay(30);
             lado = direita;
             break;
         }
@@ -477,6 +461,8 @@ void setupAuto()
             delay(150);
             moverMotores(0, 0);
             delay(10);
+            moverMotores(-255,255);
+            delay(30);
             lado = esquerda;
             break;
         }
@@ -525,7 +511,7 @@ void loopAuto()
         }
         else
         {
-            buscaIR(); // Utiliza apenas o IR durante 2 segundos de luta
+            buscaIR(); // Utiliza apenas o IR durante 4 segundos de luta
         }
         vTaskDelay(pdMS_TO_TICKS(5));
     }
