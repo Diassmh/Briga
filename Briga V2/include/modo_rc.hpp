@@ -26,6 +26,46 @@ float coefAtenuacao = 1.8; // Atenuacao da velocidade em curvas (deve ser FLOAT)
 float coefReverse = 0.9;   // Coeficiente para balancear a re (deve ser FLOAT)
 float limiteCurva = 130.0;   // Velocidade limite em curvas puras (deve ser FLOAT)
 
+bool squareAntes = false;
+// - apertou():    TRUE só no instante em que o botão passa de solto -> pressionado
+// - soltou():     TRUE só no instante em que o botão passa de pressionado -> solto
+// - segurando():  TRUE enquanto o botão estiver pressionado
+// Isso permite toggle liga/desliga dos macros sem ficar alternando enquanto você segura o botão, ou ter que fazer delays grandes.
+
+struct ButtonEdge
+{
+    bool agora = false;
+    bool antes = false;
+
+    // Atualiza os bool
+    inline void atualizar(bool valor)
+    {
+        antes = agora;
+        agora = valor;
+    }
+
+    // Solto -> Pressionado
+    inline bool apertou() const
+    {
+        return agora && !antes;
+    }
+
+    // Pressionado -> Solto
+    inline bool soltou() const
+    {
+        return !agora && antes;
+    }
+
+    // Estado contínuo
+    inline bool segurando() const
+    {
+        return agora;
+    }
+};
+
+// Botões que alternam entre liga/deliga
+ButtonEdge btnSquare;    // Toggle da mira
+ButtonEdge btnTriangle;  // Toggle do limitador de velocidade
 
 const char *BRIGA = "7c:9e:bd:fb:83:80";
 const char *RESSACA = "a4:f0:0f:68:e7:f0";
@@ -59,6 +99,10 @@ void loopRC()
     {
         if (PS4.isConnected())
         {
+            // Atualiza os estados dos botões (ocorre uma vez por loop)
+            btnSquare.atualizar(PS4.Square());
+            btnTriangle.atualizar(PS4.Triangle());
+            
             digitalWrite(led, HIGH);
             int velocidadeEsquerda = 0; // Velocidade do motor esquerdo
             int velocidadeDireita = 0;  // Velocidade do motor direito
@@ -120,36 +164,29 @@ void loopRC()
 
 
             }
-            else if (PS4.Square() && !ativarMira)
+            else if (btnSquare.apertou())
             {
-                ativarMira = true;
-                running_Sensors = true;
-                vTaskDelay(pdMS_TO_TICKS(200));
-            }
-            else if (PS4.Square())
-            {
-                ativarMira = false;
-                running_Sensors = false;
-                vTaskDelay(pdMS_TO_TICKS(200));
+                // Toggle que alterna a mira
+                ativarMira = !ativarMira;
+                if running_Sensors == false:
+                    running_Sensors = true;
+                else: running_Sensors = false;
+
+                vTaskDelay(30);
             }
 
             // ======================= || LIMITADOR DE VELOCIDADE || =======================
 
             // Limita a velocidade a 127
-            else if (PS4.Triangle() && !velLimitada)
+            else if (btnTriangle.apertou())
             {
-                velLimitada = true;
-                limiteVelocidade = 160;         // Define o limite reduzido
-                vTaskDelay(pdMS_TO_TICKS(200)); // Evita multiplas leituras
-            }
+                // Toggle do limitador de velocidade
+                velLimitada = !velLimitada;
 
-            // Permite a velocidade de 255
-            else if (PS4.Triangle())
-            {
-                velLimitada = false;
-                limiteVelocidade = 255;         // Restaura o limite maximo
-                vTaskDelay(pdMS_TO_TICKS(200)); // Evita multiplas leituras
-            }
+                // Ajusta o limite conforme o estado
+                limiteVelocidade = velLimitada ? 160 : 255;
+
+                vTaskDelay(50);
 
             else if (PS4.Circle())
             {
@@ -298,5 +335,6 @@ void loopRC()
 }
 
 #pragma endregion
+
 
 #endif
