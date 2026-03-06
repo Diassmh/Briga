@@ -1,0 +1,109 @@
+void loopRC()
+{
+
+    while (true)
+    {
+        if (PS4.isConnected())
+        {
+            // Atualiza os estados dos botões (ocorre uma vez por loop)
+            btnSquare.atualizar(PS4.Square());
+            btnTriangle.atualizar(PS4.Triangle());
+
+            digitalWrite(led, HIGH);
+            int velocidadeEsquerda = 0; // Velocidade do motor esquerdo
+            int velocidadeDireita = 0;  // Velocidade do motor direito
+
+            // ======================= || COMANDOS COM BOTÕES (MACROS) || ===================
+
+            if (PS4.Cross())
+            { // X = Frentão
+                moverMotores(240, 255);
+                delay(50);
+                continue;
+            }
+
+            else if (PS4.Left() > 0)
+            {
+
+                moverMotores(-255, 255); // Gira para a esquerda
+                delay(50);
+                moverMotores(255, 255); // Anda para frente
+                delay(150);
+                moverMotores(255, -255); // Gira para a direita
+                delay(90);
+                moverMotores(255, 255); // Anda para frente
+                delay(50);
+                moverMotores(255, -255);
+                delay(50);
+                moverMotores(0, 0);
+                delay(10);
+            }
+            else if (PS4.Right() > 0)
+            {
+                vTaskDelay(10); // Delay para garantir o fim da logica anterior
+
+                moverMotores(255, -255); // Gira para a direita
+                delay(50);
+                moverMotores(255, 255); // Anda para frente
+                delay(150);
+                moverMotores(-255, 255); // Gira para a esquerda
+                delay(90);
+                moverMotores(255, 255); // Anda para frente
+                delay(50);
+                moverMotores(-255, 255);
+                delay(50);
+                moverMotores(0, 0);
+                delay(10);
+            }
+
+            else if (btnSquare.apertou())
+            {
+                // Toggle que alterna a mira
+                ativarMira = !ativarMira;
+
+                vTaskDelay(30);
+            }
+
+            // ======================= || LIMITADOR DE VELOCIDADE || =======================
+
+            else if (btnTriangle.apertou())
+            {
+                // Toggle do limitador de velocidade
+                velLimitada = !velLimitada;
+
+                // Ajusta o limite conforme o estado
+                limiteVelocidade = velLimitada ? 160 : 255;
+
+                vTaskDelay(50);
+            }
+
+            else if (PS4.Circle())
+            {
+                if (valorSensorF == HIGH && valorSensorE == HIGH && valorSensorD == HIGH)
+                {
+                    moverMotores(255, 255);
+                    delay(50);
+                    continue;
+                }
+                else if (valorSensorF == HIGH)
+                {
+                    moverMotores(127, 127);
+                    delay(30);
+                    continue;
+                }
+                else
+                {
+                    if (valorSensorE == HIGH)
+                    {
+                        moverMotores(-80, 80);
+                        delay(30);
+                        continue;
+                    }
+                    else if (valorSensorD == HIGH)
+                    {
+                        moverMotores(80, -80);
+                        delay(30);
+                        continue;
+                    }
+                }
+            }
