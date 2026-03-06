@@ -1,0 +1,44 @@
+volatile bool velLimitada = false; // Switch definido pra limitar a velocidade do motor
+int limiteVelocidade = 127;        // Limite de velocidade do motor
+int velBase = 80;
+bool ativarMira = false;
+bool squareAntes = false;
+// - apertou():    TRUE só no instante em que o botão passa de solto -> pressionado
+// - soltou():     TRUE só no instante em que o botão passa de pressionado -> solto
+// - segurando():  TRUE enquanto o botão estiver pressionado
+// Isso permite toggle liga/desliga dos macros sem ficar alternando enquanto você segura o botão, ou ter que fazer delays grandes.
+
+struct ButtonEdge
+{
+    bool agora = false;
+    bool antes = false;
+
+    // Atualiza os bool
+    inline void atualizar(bool valor)
+    {
+        antes = agora;
+        agora = valor;
+    }
+
+    // Solto -> Pressionado
+    inline bool apertou() const
+    {
+        return agora && !antes;
+    }
+
+    // Pressionado -> Solto
+    inline bool soltou() const
+    {
+        return !agora && antes;
+    }
+
+    // Estado contínuo
+    inline bool segurando() const
+    {
+        return agora;
+    }
+};
+
+// Botões que alternam entre liga/deliga
+ButtonEdge btnSquare;    // Toggle da mira
+ButtonEdge btnTriangle;  // Toggle do limitador de velocidade
