@@ -30,7 +30,7 @@ void config()
     pinMode(receptorF, INPUT);
     pinMode(receptorE, INPUT);
     pinMode(receptorD, INPUT);
-
+    
     // --- LEDS e EXTRAS ---
     pinMode(led, OUTPUT);
     digitalWrite(led, LOW);

@@ -89,6 +89,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 #define receptorD 27
 #define receptorE 23
 
+
 #pragma endregion
 
 //======================================//Enums//======================================//
@@ -114,11 +115,11 @@ enum SelecionaBusca {Ofensiva, Defensiva, ApenasIR};
 Direction        lado            = esquerda;
 Bandeira         lado_Bandeira   = B_Direita;
 Transistor       transistor      = Ligado;
-SelecionaModo    modoSelecionado = ModoRc;
+SelecionaModo    modoSelecionado = ModoAuto;
 SelecionaBusca   ModoBusca       = Ofensiva;
 
 volatile bool valorJsumoF, valorJsumoE, valorJsumoD;
-volatile bool valorReceptorF, valorReceptorE, valorReceptorD;
+volatile bool valorReceptorF, valorReceptorE, valorReceptorD, valorReceptorExtra;
 
 char BT = 'A';          // char que é recebida pelo bluetooth
 char estrategia = 'A';  // estratégia de início da luta (qualquer caractere)

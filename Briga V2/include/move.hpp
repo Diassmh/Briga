@@ -64,8 +64,8 @@ void moverMotores(int velEsq, int velDir)
     }
 
     else if (velEsq == 0){
-        analogWrite(Motor_Esquerdo_Positivo, 127);
-        analogWrite(Motor_Esquerdo_Negativo, 127);
+       analogWrite(Motor_Esquerdo_Positivo, 127);
+       analogWrite(Motor_Esquerdo_Negativo, 127);
     }
     // Atualiza o histórico para o próximo ciclo
     ultimaVelEsq = velEsq;

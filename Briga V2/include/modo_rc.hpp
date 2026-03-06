@@ -19,11 +19,13 @@ volatile int l2 = 0;              // Valor do gatilho esquerdo do PS4 (L2)
 volatile int direcao = 0;         // Valor do direcional esquerdo do PS4 em X (LStickX)
 volatile bool velLimitada = true; // Switch definido pra limitar a velocidade do motor
 int limiteVelocidade = 160;       // Limite de velocidade do motor
+
 bool ativarMira = false;
 
 float coefAtenuacao = 1.8; // Atenuacao da velocidade em curvas (deve ser FLOAT)
 float coefReverse = 0.9;   // Coeficiente para balancear a re (deve ser FLOAT)
-float limiteCurva = 140.0;   // Velocidade limite em curvas puras (deve ser FLOAT)
+float limiteCurva = 130.0;   // Velocidade limite em curvas puras (deve ser FLOAT)
+
 
 const char *BRIGA = "7c:9e:bd:fb:83:80";
 const char *RESSACA = "a4:f0:0f:68:e7:f0";
