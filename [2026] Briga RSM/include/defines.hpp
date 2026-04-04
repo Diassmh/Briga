@@ -41,10 +41,10 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS MOTORES
 
-#define Motor_Direito_Positivo     19      //19
-#define Motor_Direito_Negativo     18      //18
-#define Motor_Esquerdo_Positivo    17      //17    
-#define Motor_Esquerdo_Negativo    16      //16
+#define Motor_Direito_Positivo     16      //19
+#define Motor_Direito_Negativo     17      //18
+#define Motor_Esquerdo_Positivo    18      //17    
+#define Motor_Esquerdo_Negativo    19      //16
 
 #pragma endregion
 
