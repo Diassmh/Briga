@@ -69,13 +69,11 @@ float normalizarDirecao(int valor)
 
     if (valor > 0)
     {
-        // Lado direito do analógico
-        saida = float(valor - zonaMorta) / float(127 - zonaMorta);
+        saida = float(valor - zonaMorta) / float(127 - zonaMorta);   // Lado direito do analógico
     }
     else
     {
-        // Lado esquerdo do analógico
-        saida = float(valor + zonaMorta) / float(128 - zonaMorta);
+        saida = float(valor + zonaMorta) / float(128 - zonaMorta);   // Lado esquerdo do analógico
     }
 
     if (saida > 1.0) saida = 1.0;
