@@ -48,8 +48,8 @@ void moverMotores(int velEsq, int velDir)
     }
     else if (velDir == 0)
     {
-        analogWrite(Motor_Direito_Positivo, 127);
-        analogWrite(Motor_Direito_Negativo, 127);
+        analogWrite(Motor_Direito_Positivo, 255);
+        analogWrite(Motor_Direito_Negativo, 255);
     }
 
     // --- ACIONAMENTO MOTOR ESQUERDO ---
@@ -66,8 +66,8 @@ void moverMotores(int velEsq, int velDir)
 
     else if (velEsq == 0)
     {
-        analogWrite(Motor_Esquerdo_Positivo, 127);
-        analogWrite(Motor_Esquerdo_Negativo, 127);
+        analogWrite(Motor_Esquerdo_Positivo, 255);
+        analogWrite(Motor_Esquerdo_Negativo, 255);
     }
     // Atualiza o histórico para o próximo ciclo
     ultimaVelEsq = velEsq;
@@ -159,7 +159,7 @@ void buscaOfensiva()
 
 //=======================================|| BUSCA CRIMINOSA ||============================================
 
-void buscaCriminosa()
+void buscaCriminosa() // Simula a busca dos hermanos
 {
 
     static unsigned long tempoBuscaAtiva = 0;
@@ -167,20 +167,22 @@ void buscaCriminosa()
 
     /* if ((valorLinhaE == HIGH) && (valorLinhaD == LOW)){
            moverMotores(0,0);
-           vTaskDelay(pdMS_TO_TICKS(10));
-           Estado = GIRO_BORDA_ESQ;
+           vTaskDelay(pdMS_TO_TICKS(30));
+           EstadoC = GIRO_BORDA_ESQ;
        }
        else if ((valorLinhaD == HIGH) && (valorLinhaE == LOW)) {
            moverMotores(0,0);
-           vTaskDelay(pdMS_TO_TICKS(10));
-           Estado = GIRO_BORDA_DIR;
+           vTaskDelay(pdMS_TO_TICKS(30));
+           EstadoC = GIRO_BORDA_DIR;
        }
        else if ((valorLinhaE == HIGH) && (valorLinhaD == HIGH))
+           moverMotores(0,0);
+           vTaskDelay(pdMS_TO_TICKS(30));
            moverMotores(-255,-255);
            vTaskDelay(pdMS_TO_TICKS(100));
        */
 
-    switch (Estado)
+    switch (EstadoC)
     {
 
     case BUSCA_FURTIVA:
@@ -190,7 +192,7 @@ void buscaCriminosa()
 
         if (valorReceptorF == HIGH || valorReceptorE == HIGH || valorReceptorD == HIGH)
         {
-            Estado = ATAQUE_IR_LENTO;
+            EstadoC = ATAQUE_IR_LENTO;
             break;
         }
 
@@ -212,7 +214,7 @@ void buscaCriminosa()
         transistor = Ligado;
 
         tempoBuscaAtiva = millis();
-        Estado = BUSCA_ATIVA;
+        EstadoC = BUSCA_ATIVA;
         break;
 
     case GIRO_BORDA_DIR:
@@ -228,7 +230,7 @@ void buscaCriminosa()
         transistor = Ligado;
 
         tempoBuscaAtiva = millis();
-        Estado = BUSCA_ATIVA;
+        EstadoC = BUSCA_ATIVA;
         break;
 
     case BUSCA_ATIVA:
@@ -239,7 +241,7 @@ void buscaCriminosa()
 
         if (valorJsumoF == HIGH || valorJsumoE == HIGH || valorJsumoD == HIGH)
         {
-            Estado = ATAQUE_JSUMO_LENTO;
+            EstadoC = ATAQUE_JSUMO_LENTO;
             break;
         }
 
@@ -247,7 +249,7 @@ void buscaCriminosa()
         {
             digitalWrite(Pino_Transistor, LOW);
             transistor = Desligado;
-            Estado = BUSCA_FURTIVA;
+            EstadoC = BUSCA_FURTIVA;
             break;
         }
 
@@ -257,7 +259,7 @@ void buscaCriminosa()
 
         if (valorReceptorF == LOW && valorReceptorE == LOW && valorReceptorD == LOW)
         {
-            Estado = BUSCA_FURTIVA;
+            EstadoC = BUSCA_FURTIVA;
             break;
         }
 
@@ -280,7 +282,7 @@ void buscaCriminosa()
             vTaskDelay(pdMS_TO_TICKS(20));
 
             inicioAtaqueTotal = millis();
-            Estado = ATAQUE_TOTAL;
+            EstadoC = ATAQUE_TOTAL;
             break;
         }
 
@@ -308,7 +310,7 @@ void buscaCriminosa()
         {
             digitalWrite(Pino_Transistor, LOW);
             transistor = Desligado;
-            Estado = BUSCA_FURTIVA;
+            EstadoC = BUSCA_FURTIVA;
             break;
         }
 
@@ -328,7 +330,7 @@ void buscaCriminosa()
             vTaskDelay(pdMS_TO_TICKS(20));
 
             inicioAtaqueTotal = millis();
-            Estado = ATAQUE_TOTAL;
+            EstadoC = ATAQUE_TOTAL;
             break;
         }
 
@@ -370,7 +372,7 @@ void buscaCriminosa()
             digitalWrite(Pino_Transistor, LOW);
             transistor = Desligado;
 
-            Estado = BUSCA_FURTIVA;
+            EstadoC = BUSCA_FURTIVA;
             break;
         }
 
@@ -378,13 +380,13 @@ void buscaCriminosa()
         {
             if (valorJsumoE == HIGH || valorJsumoD == HIGH)
             {
-                Estado = ATAQUE_JSUMO_LENTO;
+                EstadoC = ATAQUE_JSUMO_LENTO;
             }
             else if (valorReceptorE == HIGH || valorReceptorD == HIGH)
             {
                 digitalWrite(Pino_Transistor, LOW);
                 transistor = Desligado;
-                Estado = ATAQUE_IR_LENTO;
+                EstadoC = ATAQUE_IR_LENTO;
             }
         }
 
@@ -481,6 +483,183 @@ void buscaIR()
         {
             moverMotores(-90, 90);
         }
+    }
+}
+
+void buscaDefensiva() // Essa é a que você procura, Giovanni
+{
+
+    switch (EstadoD)
+    {
+
+    case BUSCA_GIRANDO:
+
+        // 1. Prioridade: Verificar Receptores (IR)
+        if (valorReceptorF == HIGH || valorReceptorE == HIGH || valorReceptorD == HIGH)
+        {
+            digitalWrite(Pino_Transistor, LOW);
+            transistor = Desligado;
+            alvoAlinhado = false; // Garante que o timer zere ao entrar no ataque
+            EstadoD = ATAQUE_IR_LENTOD;
+            break;
+        }
+
+        // 2. Lógica de acionamento do JSumo (300ms desligado, 120ms ligado)
+        if (!jsumoEmPulso)
+        {
+            if (millis() - tempoCicloJsumo >= 300)
+            {
+                digitalWrite(Pino_Transistor, HIGH);
+                transistor = Ligado;
+                jsumoEmPulso = true;
+                tempoCicloJsumo = millis();
+            }
+        }
+        else
+        {
+            if (valorJsumoF == HIGH || valorJsumoE == HIGH || valorJsumoD == HIGH)
+            {
+                alvoAlinhado = false; // Garante que o timer zere ao entrar no ataque
+                EstadoD = ATAQUE_JSUMO_LENTOD;
+                break;
+            }
+
+            if (millis() - tempoCicloJsumo >= 120)
+            {
+                digitalWrite(Pino_Transistor, LOW);
+                transistor = Desligado;
+                jsumoEmPulso = false;
+                tempoCicloJsumo = millis();
+            }
+        }
+
+        // 3. Movimento Padrão: Girar no próprio eixo buscando o inimigo
+        moverMotores(90, -90);
+        break;
+
+    case ATAQUE_IR_LENTOD:
+
+        digitalWrite(Pino_Transistor, LOW);
+        transistor = Desligado;
+
+        // Se perder o alvo de vista, volta a girar e buscar
+        if (valorReceptorF == LOW && valorReceptorE == LOW && valorReceptorD == LOW)
+        {
+            alvoAlinhado = false; // Reseta o estado de alinhamento
+            EstadoD = BUSCA_GIRANDO;
+            break;
+        }
+
+        // Lógica de Alinhamento e Avanço com Espera
+        if (valorReceptorF == HIGH)
+        {
+            if (!alvoAlinhado)
+            {
+                tempoAlinhamento = millis(); // Começa a contar o tempo
+                alvoAlinhado = true;
+            }
+
+            if ((millis() - tempoAlinhamento >= 200) && (millis() - tempoAlinhamento < 1000))
+            {
+                moverMotores(50, 50);
+            }
+
+            else if (millis() - tempoAlinhamento >= 1000)
+            {
+                moverMotores(127, 127);
+            }
+            else
+            {
+                moverMotores(0, 0);
+            }
+        }
+        else
+        {
+            alvoAlinhado = false; // O alvo saiu da frente, zera o cronômetro
+
+            if (valorReceptorE == HIGH)
+            {
+                moverMotores(-70, 70);
+            }
+            else if (valorReceptorD == HIGH)
+            {
+                moverMotores(70, -70);
+            }
+        }
+
+        break;
+
+    case ATAQUE_JSUMO_LENTOD:
+
+        digitalWrite(Pino_Transistor, HIGH);
+        transistor = Ligado;
+
+        // Se perder o alvo de vista, desliga o Jsumo e volta a buscar
+        if (valorJsumoF == LOW && valorJsumoE == LOW && valorJsumoD == LOW)
+        {
+            digitalWrite(Pino_Transistor, LOW);
+            transistor = Desligado;
+            jsumoEmPulso = false;
+            tempoCicloJsumo = millis();
+            alvoAlinhado = false; // Reseta o estado de alinhamento
+            EstadoD = BUSCA_GIRANDO;
+            break;
+        }
+
+        // Lógica de Alinhamento e Avanço com Espera
+        if (valorJsumoF == HIGH)
+        {
+            if (!alvoAlinhado)
+            {
+                tempoAlinhamento = millis(); // Começa a contar o tempo
+                alvoAlinhado = true;
+            }
+
+            else if ((millis() - tempoAlinhamento >= 200) && (millis() - tempoAlinhamento < 600))
+            {
+                if (valorJsumoE == HIGH)
+                {
+                    moverMotores(55, 85);
+                }
+                else if (valorJsumoD == HIGH)
+                {
+                    moverMotores(85, 55);
+                }
+                else
+                {
+                    moverMotores(70, 70);
+                }
+            }
+
+            else if ((millis() - tempoAlinhamento >= 600) && (millis() - tempoAlinhamento < 1200))
+            {
+                moverMotores(127, 127);
+            }
+
+            else if ((millis() - tempoAlinhamento >= 1200))
+            {
+                moverMotores(255, 255);
+            }
+            else
+            {
+                moverMotores(0, 0);
+            }
+        }
+        else // Caso pare de ver com o sensor do meio:
+        {
+            alvoAlinhado = false; // O alvo saiu da frente, zera o cronômetro
+
+            if (valorJsumoE == HIGH)
+            {
+                moverMotores(-127, 127);
+            }
+            else if (valorJsumoD == HIGH)
+            {
+                moverMotores(127, -127);
+            }
+        }
+
+        break;
     }
 }
 

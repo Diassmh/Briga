@@ -41,10 +41,10 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS MOTORES
 
-#define Motor_Direito_Positivo     16      //19
-#define Motor_Direito_Negativo     17      //18
-#define Motor_Esquerdo_Positivo    18      //17    
-#define Motor_Esquerdo_Negativo    19      //16
+#define Motor_Direito_Positivo 16  // 19
+#define Motor_Direito_Negativo 17  // 18
+#define Motor_Esquerdo_Positivo 19 // 17
+#define Motor_Esquerdo_Negativo 18 // 16
 
 #pragma endregion
 
@@ -52,7 +52,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS SERVO
 
-#define SERVOMOTOR_PIN 26
+#define SERVOMOTOR_PIN 5
 #define SERVO_ANGULO_INICIAL 90
 #define SERVO_FREQ_HZ 50
 #define SERVO_RESOLUTION 16
@@ -70,7 +70,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #define botao1 0x0
 #define botao2 0x1
-#define botao3 0x2      // Botões do controle remoto
+#define botao3 0x2 // Botões do controle remoto
 #define botao8 0x7
 #define botao9 0x8
 
@@ -82,13 +82,12 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #define Pino_Transistor 25 //  AUTO | Transistor que desliga
 
-#define jSumoF 39
-#define jSumoD 36
-#define jSumoE 34
-#define receptorF 27    // 27
-#define receptorD 23    //23
-#define receptorE 4    //4
-
+#define jSumoF 34
+#define jSumoD 39
+#define jSumoE 36
+#define receptorF 27 // 27
+#define receptorD 23 // 23
+#define receptorE 4  // 4
 
 #pragma endregion
 
@@ -96,51 +95,90 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region ENUMS
 
-enum Direction {esquerda, direita, frente};
-
-enum Bandeira {B_Esquerda, B_Direita};
-
-enum Transistor{Ligado, Desligado};
-
-enum SelecionaModo {NaoSelecionado, ModoAuto, ModoRc};
-
-enum SelecionaBusca {Ofensiva, Criminosa, ApenasIR};  
-
-enum EstadoCriminoso {
-  BUSCA_FURTIVA,            // Jsumo Desligado, Receptores ligados
-  GIRO_BORDA_ESQ,           // Borda detectada na esquerda
-  GIRO_BORDA_DIR,           // Borda detectada na direita
-  BUSCA_ATIVA,              // Liga os Jsumos após detectar alguma borda
-  ATAQUE_IR_LENTO,          // Detectou com IR caiu aqui
-  ATAQUE_JSUMO_LENTO,       // Detectou com Jsumo, caiu aqui
-  ATAQUE_TOTAL              // Está perto / Rampou, caiu aqui
+enum Direction
+{
+  esquerda,
+  direita,
+  frente
 };
+
+enum Bandeira
+{
+  B_Esquerda,
+  B_Direita
+};
+
+enum Transistor
+{
+  Ligado,
+  Desligado
+};
+
+enum SelecionaModo
+{
+  NaoSelecionado,
+  ModoAuto,
+  ModoRc
+};
+
+enum SelecionaBusca
+{
+  Ofensiva,
+  Criminosa,
+  ApenasIR,
+  Defensiva
+};
+
+enum EstadoCriminoso
+{
+  BUSCA_FURTIVA,      // Jsumo Desligado, Receptores ligados
+  GIRO_BORDA_ESQ,     // Borda detectada na esquerda
+  GIRO_BORDA_DIR,     // Borda detectada na direita
+  BUSCA_ATIVA,        // Liga os Jsumos após detectar alguma borda
+  ATAQUE_IR_LENTO,    // Detectou com IR caiu aqui
+  ATAQUE_JSUMO_LENTO, // Detectou com Jsumo, caiu aqui
+  ATAQUE_TOTAL        // Está perto / Rampou, caiu aqui
+};
+
+enum EstadoDefensivo
+{
+  BUSCA_GIRANDO,
+  ATAQUE_IR_LENTOD,
+  ATAQUE_JSUMO_LENTOD
+};
+
 #pragma endregion
 
 //===================================//Variaveis utilizadas//====================================//
 
 #pragma region VARIAVEIS
 
-Direction        lado            = esquerda;
-Bandeira         lado_Bandeira   = B_Direita;
-Transistor       transistor      = Ligado;
-SelecionaModo    modoSelecionado = NaoSelecionado;
-SelecionaBusca   ModoBusca       = Ofensiva;
-EstadoCriminoso  Estado          = BUSCA_FURTIVA; 
+Direction lado = esquerda;
+Bandeira lado_Bandeira = B_Direita;
+Transistor transistor = Ligado;
+SelecionaModo modoSelecionado = ModoAuto;
+SelecionaBusca ModoBusca = Ofensiva;
+EstadoCriminoso EstadoC = BUSCA_FURTIVA;
+EstadoDefensivo EstadoD = BUSCA_GIRANDO;
 
 volatile bool valorJsumoF, valorJsumoE, valorJsumoD;
 volatile bool valorReceptorF, valorReceptorE, valorReceptorD;
 
-char BT = 'A';          // char que é recebida pelo bluetooth
-char estrategia = 'A';  // estratégia de início da luta (qualquer caractere)
-bool running_Sensors = false;  
+char BT = 'A';         // char que é recebida pelo bluetooth
+char estrategia = 'A'; // estratégia de início da luta (qualquer caractere)
+bool running_Sensors = false;
 bool atacando = false;
 bool flagPrimeiraVez = true; // Busca IR
-unsigned long tempoInicioIR, tempoIncremento; 
+unsigned long tempoInicioIR, tempoIncremento;
 unsigned long inicioDoAtaque = 0;
 unsigned long inicioDefensivo = 0;
 
-#pragma endregion
+// Variáveis Busca Defensiva
+unsigned long tempoCicloJsumo = 0;
+bool jsumoEmPulso = false;
+unsigned long tempoAlinhamento = 0;
+bool alvoAlinhado = false;
 
+#pragma endregion
 
 #endif

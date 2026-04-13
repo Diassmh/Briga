@@ -24,19 +24,18 @@ void vTaskSensores(void *pvParameters)
                 if (IrReceiver.decodedIRData.command == botao3) // Se o sinal recebido é 3
                 {
                     digitalWrite(led, LOW); // Apaga o led
-                    moverMotores(0, 0);   // Para os motores
-                    ESP.restart();        // Reinicia o ESP
+                    moverMotores(0, 0);     // Para os motores
+                    ESP.restart();          // Reinicia o ESP
                 }
             }
 
             valorJsumoF = digitalRead(jSumoF);
             valorJsumoE = digitalRead(jSumoE);
             valorJsumoD = digitalRead(jSumoD);
-            
+
             valorReceptorF = !(digitalRead(receptorF));
             valorReceptorE = !(digitalRead(receptorE));
             valorReceptorD = !(digitalRead(receptorD));
-
 
             if ((valorJsumoE) || (valorReceptorE))
             {

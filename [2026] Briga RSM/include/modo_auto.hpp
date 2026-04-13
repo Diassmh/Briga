@@ -34,11 +34,13 @@ void mostrarMenu()
     SerialBT.println(" X     : Desligar Sensores");
     SerialBT.println(" B     : Busca Criminosa");
     SerialBT.println(" I     : Busca IR");
+    SerialBT.println(" Z     : Busca Defensiva");
     SerialBT.println(" < / > : Define Lado (Esq/Dir)");
     SerialBT.println(" =     : Define Lado Frente (Costas Apenas)");
     SerialBT.println(" l / r : Bandeira (Left/Right)");
     SerialBT.println(" S     : Debug Sensores (Reset p/ sair)");
     SerialBT.println(" R     : Debug IR");
+    SerialBT.println(" j     : Debug Pisca J sumo");
     SerialBT.println(" h     : Mostrar Menu");
     SerialBT.println("======================================\n");
 }
@@ -51,17 +53,22 @@ void checarStatus()
     SerialBT.println("\n--- STATUS ATUAL ---");
     SerialBT.print("Estrategia: ");
     SerialBT.println(estrategia);
-    
+
     SerialBT.print("Lado: ");
     SerialBT.println(lado == direita ? "Direita" : (lado == esquerda ? "Esquerda" : "Frente"));
-    
+
     SerialBT.print("Bandeira: ");
     SerialBT.println(lado_Bandeira == B_Esquerda ? "Esquerda" : "Direita");
-    
+
     SerialBT.print("Busca: ");
-    if (ModoBusca == Ofensiva) SerialBT.println("Ofensiva");
-    else if (ModoBusca == Criminosa) SerialBT.println("Criminosa");
-    else SerialBT.println("Apenas IR");
+    if (ModoBusca == Ofensiva)
+        SerialBT.println("Ofensiva");
+    else if (ModoBusca == Criminosa)
+        SerialBT.println("Criminosa");
+    else if (ModoBusca == Defensiva)
+        SerialBT.println("Defensiva");
+    else
+        SerialBT.println("Apenas IR");
 
     SerialBT.print("Sensores: ");
     SerialBT.println(transistor == Ligado ? "Ligados" : "Desligados");
@@ -99,27 +106,66 @@ void setupAuto()
         if (SerialBT.available())
         {
             BT = SerialBT.read();
-        
-            if (BT != 13 && BT != 10) 
+
+            if (BT != 13 && BT != 10)
             {
                 SerialBT.println(BT);
 
-                if (BT == '<') { lado = esquerda;     }
-                else if (BT == '>') { lado = direita; }
-                else if (BT == '=') { lado = frente;  }
+                if (BT == '<')
+                {
+                    lado = esquerda;
+                }
+                else if (BT == '>')
+                {
+                    lado = direita;
+                }
+                else if (BT == '=')
+                {
+                    lado = frente;
+                }
 
-                else if (BT == 'l') { lado_Bandeira = B_Esquerda; }
-                else if (BT == 'r') { lado_Bandeira = B_Direita;  }
+                else if (BT == 'l')
+                {
+                    lado_Bandeira = B_Esquerda;
+                }
+                else if (BT == 'r')
+                {
+                    lado_Bandeira = B_Direita;
+                }
 
-                else if (BT == 'X') { transistor = Desligado; digitalWrite(Pino_Transistor, LOW); }
+                else if (BT == 'X')
+                {
+                    transistor = Desligado;
+                    digitalWrite(Pino_Transistor, LOW);
+                }
 
-                else if (BT == 'B') { ModoBusca = Criminosa; }
-                else if (BT == 'O') { ModoBusca = Ofensiva;  }
-                else if (BT == 'I') { ModoBusca = ApenasIR; transistor = Desligado; digitalWrite(Pino_Transistor, LOW);}
-                
-                else if (BT == 'h') { mostrarMenu(); }
-                else if (BT == 'S') 
-                { 
+                else if (BT == 'B')
+                {
+                    ModoBusca = Criminosa;
+                }
+                else if (BT == 'O')
+                {
+                    ModoBusca = Ofensiva;
+                }
+                else if (BT == 'I')
+                {
+                    ModoBusca = ApenasIR;
+                    transistor = Desligado;
+                    digitalWrite(Pino_Transistor, LOW);
+                }
+                else if (BT == 'Z')
+                {
+                    ModoBusca = Defensiva;
+                    transistor = Desligado;
+                    digitalWrite(Pino_Transistor, LOW);
+                }
+
+                else if (BT == 'h')
+                {
+                    mostrarMenu();
+                }
+                else if (BT == 'S')
+                {
                     running_Sensors = true;
                     for (;;)
                     {
@@ -127,10 +173,10 @@ void setupAuto()
                         vTaskDelay(pdMS_TO_TICKS(50));
                     }
                 }
-                else if(BT == 'R')
+                else if (BT == 'R')
                 {
                     running_Sensors = true;
-                    digitalWrite(Pino_Transistor,LOW);
+                    digitalWrite(Pino_Transistor, LOW);
                     transistor = Desligado;
                     for (;;)
                     {
@@ -140,10 +186,15 @@ void setupAuto()
                 }
                 else // Se não for nenhuma config de cima, é a Estratégia Principal
                 {
-                    if (BT > 48 && BT < 58) { /* Ignora números soltos se houver */ }
-                    else { estrategia = BT; }
+                    if (BT > 48 && BT < 58)
+                    { /* Ignora números soltos se houver */
+                    }
+                    else
+                    {
+                        estrategia = BT;
+                    }
                 }
-                checarStatus(); 
+                checarStatus();
             }
         }
 #pragma endregion
@@ -314,9 +365,13 @@ void setupAuto()
             moverMotores(-255, 255);
             delay(60);
             moverMotores(255, 255);
-            delay(160);
+            delay(130);
+            moverMotores(0, 0);
+            delay(15);
             moverMotores(255, -255);
-            delay(25);
+            delay(50);
+            moverMotores(255, 255);
+            delay(50);
             moverMotores(0, 0);
             delay(10);
             lado = direita;
@@ -327,9 +382,13 @@ void setupAuto()
             moverMotores(255, -255);
             delay(60);
             moverMotores(255, 255);
-            delay(160);
+            delay(130);
+            moverMotores(0, 0);
+            delay(15);
             moverMotores(-255, 255);
-            delay(25);
+            delay(50);
+            moverMotores(255, 255);
+            delay(50);
             moverMotores(0, 0);
             delay(10);
             lado = esquerda;
@@ -356,13 +415,13 @@ void setupAuto()
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
-            delay(55);
+            delay(50);
             moverMotores(255, 255);
             delay(160);
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, -255);
-            delay(110);
+            delay(120);
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, 255);
@@ -373,13 +432,13 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(255, -255);
-            delay(55);
+            delay(50);
             moverMotores(255, 255);
             delay(160);
             moverMotores(0, 0);
             delay(10);
             moverMotores(-255, 255);
-            delay(110);
+            delay(140);
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, 255);
@@ -412,7 +471,6 @@ void setupAuto()
                 giroDireita = true;
                 giroEsquerda = false;
                 flagM = true;
-                
             }
         }
         if (giroDireita)
@@ -449,7 +507,7 @@ void setupAuto()
             delay(150);
             moverMotores(0, 0);
             delay(10);
-            moverMotores(255,-255);
+            moverMotores(255, -255);
             delay(30);
             lado = direita;
             break;
@@ -462,7 +520,7 @@ void setupAuto()
             delay(150);
             moverMotores(0, 0);
             delay(10);
-            moverMotores(-255,255);
+            moverMotores(-255, 255);
             delay(30);
             lado = esquerda;
             break;
@@ -472,7 +530,7 @@ void setupAuto()
         {
             moverMotores(-255, 255);
             delay(80);
-            moverMotores(0,0);
+            moverMotores(0, 0);
             delay(10);
             lado = direita;
             break;
@@ -481,12 +539,22 @@ void setupAuto()
         {
             moverMotores(255, -255);
             delay(80);
-            moverMotores(0,0);
+            moverMotores(0, 0);
             delay(10);
             lado = esquerda;
             break;
         }
-    }    
+
+    case 'j':
+
+        while (true)
+        {
+            digitalWrite(Pino_Transistor, LOW);
+            delay(300);
+            digitalWrite(Pino_Transistor, HIGH);
+            delay(60);
+        }
+    }
 }
 
 #pragma endregion
@@ -510,9 +578,13 @@ void loopAuto()
         {
             buscaCriminosa();
         }
+        else if (ModoBusca == Defensiva)
+        {
+            buscaDefensiva();
+        }
         else
         {
-            buscaIR(); // Utiliza apenas o IR durante 5 segundos de luta
+            buscaIR();
         }
         vTaskDelay(pdMS_TO_TICKS(5));
     }
