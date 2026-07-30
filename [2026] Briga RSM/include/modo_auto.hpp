@@ -11,6 +11,23 @@
 
 #pragma endregion
 
+void LedFicaVerde(int numeroDaEtapa)
+{
+    // Altera apenas a cor do LED da etapa correspondente
+    if (numeroDaEtapa >= 0 && numeroDaEtapa < 5)
+    {
+        leds[numeroDaEtapa] = CRGB::Green;
+        FastLED.show(); // Envia o comando atualizado
+    }
+}
+
+void TodosLedsAmarelos()
+{
+    // A FastLED possui a função fill_solid que preenche todo o array de uma vez
+    fill_solid(leds, 5, CRGB::Yellow);
+    FastLED.show(); // Envia o comando para acender a fita
+}
+
 #pragma region Menu Guia
 void mostrarMenu()
 {
@@ -58,7 +75,7 @@ void checarStatus()
     SerialBT.println(lado == direita ? "Direita" : (lado == esquerda ? "Esquerda" : "Frente"));
 
     SerialBT.print("Bandeira: ");
-    SerialBT.println(lado_Bandeira == B_Esquerda ? "Esquerda" : "Direita");
+    SerialBT.println(lado_Bandeira == B_Esquerda ? "Esquerda" : "Direita"); //
 
     SerialBT.print("Busca: ");
     if (ModoBusca == Ofensiva)
@@ -73,6 +90,8 @@ void checarStatus()
     SerialBT.print("Sensores: ");
     SerialBT.println(transistor == Ligado ? "Ligados" : "Desligados");
     SerialBT.println("--------------------\n");
+    LedFicaVerde(4);
+    num_led = 5;
 }
 #pragma endregion
 
@@ -80,6 +99,9 @@ void checarStatus()
 
 void setupAuto()
 {
+    num_led = 2;
+    LedFicaVerde(0);
+    LedFicaVerde(1);
     for (int i = 0; i < 2; i++)
     {
         digitalWrite(led, HIGH);
@@ -88,17 +110,24 @@ void setupAuto()
         delay(250);
     }
 
-    SerialBT.begin("Briga"); // Inicia Bluetooth do Celular (SerialBT):
+    SerialBT.begin("Briga_Briga_Based"); // Inicia Bluetooth do Celular (SerialBT):
 
     bool primeiraVez = true;
     while (true)
     {
+        uint8_t brilhoPulsante = beatsin8(30, 40, 120);
+        fill_solid(leds, num_led, CHSV(96, 255, brilhoPulsante));
+        FastLED.show();
+
         if (SerialBT.connected() && primeiraVez)
         {
             SerialBT.println("CONECTADO");
             mostrarMenu();
             digitalWrite(led, HIGH);
             primeiraVez = false;
+            LedFicaVerde(2);
+            LedFicaVerde(3);
+            num_led = 4;
         }
 
         // ============================|| ESCOLHA DE CONFIGURAÇÕES ||================================
@@ -206,6 +235,7 @@ void setupAuto()
             IrReceiver.resume();
             if (IrReceiver.decodedIRData.command == botao1) // Se recebermos 1 do controle Remoto:
             {
+
                 for (int i = 0; i < 2; i++) // Entramos no loop
                 {
 
@@ -241,7 +271,7 @@ void setupAuto()
 #pragma endregion
 #pragma region Estrategias
     //=============================|| COMEÇO DE LUTA ||================================
-
+    TodosLedsAmarelos();
     SerialBT.println("BORAAAAAAAAA");
 
     // Queda da Bandeira:
@@ -288,7 +318,7 @@ void setupAuto()
 
         SerialBT.print("FRENTAO BOLADO");
         moverMotores(255, 255);
-        delay(150);
+        delay(250);
         break;
 
     case 'b': // Costas
@@ -415,7 +445,7 @@ void setupAuto()
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
-            delay(50);
+            delay(40);
             moverMotores(255, 255);
             delay(160);
             moverMotores(0, 0);
@@ -432,7 +462,7 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(255, -255);
-            delay(50);
+            delay(40);
             moverMotores(255, 255);
             delay(160);
             moverMotores(0, 0);
@@ -476,7 +506,7 @@ void setupAuto()
         if (giroDireita)
         {
             moverMotores(255, 255);
-            delay(90);
+            delay(110);
             moverMotores(0, 0);
             delay(20);
             moverMotores(255, -255);
@@ -488,7 +518,7 @@ void setupAuto()
         else if (giroEsquerda)
         {
             moverMotores(255, 255);
-            delay(90);
+            delay(110);
             moverMotores(0, 0);
             delay(20);
             moverMotores(-255, 255);
@@ -549,10 +579,8 @@ void setupAuto()
 
         while (true)
         {
-            digitalWrite(Pino_Transistor, LOW);
-            delay(300);
-            digitalWrite(Pino_Transistor, HIGH);
-            delay(60);
+            moverMotores(255, 255);
+            delay(10);
         }
     }
 }

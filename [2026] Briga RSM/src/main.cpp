@@ -1,6 +1,6 @@
 /*/=========================================================================================================
 ===========================================================================================================
-=====================================     //    BRIGA V1   //    =============================================
+=====================================     //    BRIGA RSM   //    =============================================
 ==========================================================================================================
 ========================================================================================================*/
 
@@ -14,6 +14,13 @@
 
 // ======================================|| CONFIG ||=======================================
 #pragma region Config
+
+void iniciarTodosVermelhos()
+{
+    // A FastLED possui a função fill_solid que preenche todo o array de uma vez
+    fill_solid(leds, 5, CRGB::Red);
+    FastLED.show(); // Envia o comando para acender a fita
+}
 
 void config()
 {
@@ -30,13 +37,17 @@ void config()
     pinMode(receptorF, INPUT);
     pinMode(receptorE, INPUT);
     pinMode(receptorD, INPUT);
-    
+
     // --- LEDS e EXTRAS ---
     pinMode(led, OUTPUT);
     digitalWrite(led, LOW);
 
     pinMode(Pino_Transistor, OUTPUT);
-    digitalWrite(Pino_Transistor, HIGH); 
+    digitalWrite(Pino_Transistor, HIGH);
+
+    FastLED.addLeds<WS2812, leds_end, GRB>(leds, 5);
+    FastLED.setBrightness(100); // Brilho em 50 para evitar pico de corrente
+    iniciarTodosVermelhos();    // Inicia o código com os 5 LEDs vermelhos
 
     // --- IR ---
     IrReceiver.begin(IR, DISABLE_LED_FEEDBACK, led);
@@ -45,9 +56,6 @@ void config()
     servoBandeira.setPeriodHertz(SERVO_FREQ_HZ);
     servoBandeira.attach(SERVOMOTOR_PIN, SERVO_MIN_PULSE_US, SERVO_MAX_PULSE_US);
     servoBandeira.write(SERVO_ANGULO_INICIAL);
-    //vTaskDelay(pdMS_TO_TICKS(200));
-    //servoBandeira.detach();
-    
 }
 
 #pragma endregion
@@ -78,12 +86,16 @@ void loop()
 
     while (modoSelecionado == NaoSelecionado)
     {
-        static unsigned long lastBlink = 0;
-        if (millis() - lastBlink > 500)     // Piscar do Led
+        uint8_t brilhoPulsante = beatsin8(30, 40, 120);
+        fill_solid(leds, 5, CHSV(0, 255, brilhoPulsante));
+        FastLED.show();
+
+        /*static unsigned long lastBlink = 0;
+        if (millis() - lastBlink > 500) // Piscar do Led
         {
             lastBlink = millis();
             digitalWrite(led, !digitalRead(led)); // Lê o estado, inverte e escreve
-        }
+        }*/
 
         if (IrReceiver.decode())
         {
@@ -91,14 +103,16 @@ void loop()
             IrReceiver.resume();
 
             if (IrReceiver.decodedIRData.command == botao8) // Botão 8 -> MODO AUTO
-            {                            
-                digitalWrite(led, HIGH); 
+            {
+                digitalWrite(led, HIGH);
+                LedFicaVerde(0);
+                LedFicaVerde(1);
                 vTaskDelay(pdMS_TO_TICKS(1500));
                 modoSelecionado = ModoAuto;
             }
-            else if (IrReceiver.decodedIRData.command == botao9)  // Botão 9 -> MODO RC
-            {                           
-                digitalWrite(led, HIGH); 
+            else if (IrReceiver.decodedIRData.command == botao9) // Botão 9 -> MODO RC
+            {
+                digitalWrite(led, HIGH);
                 vTaskDelay(pdMS_TO_TICKS(1500));
                 modoSelecionado = ModoRc;
             }

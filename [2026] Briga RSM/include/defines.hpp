@@ -11,6 +11,7 @@
 #include <BluetoothSerial.h>
 #include <IRremote.hpp>
 #include <ESP32Servo.h>
+#include <FastLED.h>
 
 #pragma endregion
 
@@ -41,8 +42,8 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS MOTORES
 
-#define Motor_Direito_Positivo 16  // 19
-#define Motor_Direito_Negativo 17  // 18
+#define Motor_Direito_Positivo 16  // 18
+#define Motor_Direito_Negativo 17  // 19
 #define Motor_Esquerdo_Positivo 19 // 17
 #define Motor_Esquerdo_Negativo 18 // 16
 
@@ -52,7 +53,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS SERVO
 
-#define SERVOMOTOR_PIN 5
+#define SERVOMOTOR_PIN 5 // 5
 #define SERVO_ANGULO_INICIAL 90
 #define SERVO_FREQ_HZ 50
 #define SERVO_RESOLUTION 16
@@ -65,6 +66,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region COMUNICACAO
 
+#define leds_end 33
 #define led 2
 #define IR 13
 
@@ -82,12 +84,12 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #define Pino_Transistor 25 //  AUTO | Transistor que desliga
 
-#define jSumoF 34
-#define jSumoD 39
-#define jSumoE 36
-#define receptorF 27 // 27
-#define receptorD 23 // 23
-#define receptorE 4  // 4
+#define jSumoF 34    // 34  fuego:21
+#define jSumoD 36    // 36   fuego 4
+#define jSumoE 39    // 39   fuego 5
+#define receptorF 4  // 4
+#define receptorD 27 // 27
+#define receptorE 23 // 23
 
 #pragma endregion
 
@@ -156,13 +158,15 @@ enum EstadoDefensivo
 Direction lado = esquerda;
 Bandeira lado_Bandeira = B_Direita;
 Transistor transistor = Ligado;
-SelecionaModo modoSelecionado = ModoAuto;
+SelecionaModo modoSelecionado = ModoRc;
 SelecionaBusca ModoBusca = Ofensiva;
 EstadoCriminoso EstadoC = BUSCA_FURTIVA;
 EstadoDefensivo EstadoD = BUSCA_GIRANDO;
 
 volatile bool valorJsumoF, valorJsumoE, valorJsumoD;
 volatile bool valorReceptorF, valorReceptorE, valorReceptorD;
+
+CRGB leds[5];
 
 char BT = 'A';         // char que é recebida pelo bluetooth
 char estrategia = 'A'; // estratégia de início da luta (qualquer caractere)
@@ -172,6 +176,7 @@ bool flagPrimeiraVez = true; // Busca IR
 unsigned long tempoInicioIR, tempoIncremento;
 unsigned long inicioDoAtaque = 0;
 unsigned long inicioDefensivo = 0;
+int num_led = 1;
 
 // Variáveis Busca Defensiva
 unsigned long tempoCicloJsumo = 0;

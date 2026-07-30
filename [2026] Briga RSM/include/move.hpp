@@ -48,8 +48,8 @@ void moverMotores(int velEsq, int velDir)
     }
     else if (velDir == 0)
     {
-        analogWrite(Motor_Direito_Positivo, 255);
-        analogWrite(Motor_Direito_Negativo, 255);
+        analogWrite(Motor_Direito_Positivo, 255);  //mudar
+        analogWrite(Motor_Direito_Negativo, 255);  //mudar
     }
 
     // --- ACIONAMENTO MOTOR ESQUERDO ---
@@ -66,8 +66,8 @@ void moverMotores(int velEsq, int velDir)
 
     else if (velEsq == 0)
     {
-        analogWrite(Motor_Esquerdo_Positivo, 255);
-        analogWrite(Motor_Esquerdo_Negativo, 255);
+        analogWrite(Motor_Esquerdo_Positivo, 255);  //mudar
+        analogWrite(Motor_Esquerdo_Negativo, 255);  //mudar
     }
     // Atualiza o histórico para o próximo ciclo
     ultimaVelEsq = velEsq;
@@ -93,7 +93,7 @@ void buscaOfensiva()
         unsigned long tempoDeAtaque = millis() - inicioDoAtaque;
 
         // Define a velocidade máxima baseado no tempo do ciclo do ataque
-        int velMax = (tempoDeAtaque < 180) ? 127 : 255;
+        int velMax = (tempoDeAtaque < 500) ? 70 : 255;
         int velReduzida = velMax / 2;
 
         // 1. Oponente Centralizado
@@ -148,17 +148,18 @@ void buscaOfensiva()
 
         if (lado == direita)
         {
-            moverMotores(90, -90);
+            moverMotores(100, -100);
         }
         else if (lado == esquerda)
         {
-            moverMotores(-90, 90);
+            moverMotores(-100, 100);
         }
     }
 }
 
 //=======================================|| BUSCA CRIMINOSA ||============================================
-
+#pragma region Busca Criminosa
+/*
 void buscaCriminosa() // Simula a busca dos hermanos
 {
 
@@ -180,7 +181,7 @@ void buscaCriminosa() // Simula a busca dos hermanos
            vTaskDelay(pdMS_TO_TICKS(30));
            moverMotores(-255,-255);
            vTaskDelay(pdMS_TO_TICKS(100));
-       */
+
 
     switch (EstadoC)
     {
@@ -393,6 +394,191 @@ void buscaCriminosa() // Simula a busca dos hermanos
         break;
     }
 }
+*/
+
+void buscaCriminosa()
+{
+
+    switch (EstadoD)
+    {
+
+    case BUSCA_GIRANDO:
+
+        // 1. Prioridade: Verificar Receptores (IR)
+        if (valorReceptorF == HIGH || valorReceptorE == HIGH || valorReceptorD == HIGH)
+        {
+            digitalWrite(Pino_Transistor, LOW);
+            transistor = Desligado;
+            alvoAlinhado = false; // Garante que o timer zere ao entrar no ataque
+            EstadoD = ATAQUE_IR_LENTOD;
+            break;
+        }
+
+        // 2. Lógica de acionamento do JSumo (300ms desligado, 120ms ligado)
+        if (!jsumoEmPulso)
+        {
+            if (millis() - tempoCicloJsumo >= 300)
+            {
+                digitalWrite(Pino_Transistor, HIGH);
+                transistor = Ligado;
+                jsumoEmPulso = true;
+                tempoCicloJsumo = millis();
+            }
+        }
+        else
+        {
+            if (valorJsumoF == HIGH || valorJsumoE == HIGH || valorJsumoD == HIGH)
+            {
+                alvoAlinhado = false; // Garante que o timer zere ao entrar no ataque
+                EstadoD = ATAQUE_JSUMO_LENTOD;
+                break;
+            }
+
+            if (millis() - tempoCicloJsumo >= 90)
+            {
+                digitalWrite(Pino_Transistor, LOW);
+                transistor = Desligado;
+                jsumoEmPulso = false;
+                tempoCicloJsumo = millis();
+            }
+        }
+
+        // 3. Movimento Padrão: Ir para frente muito lento
+        moverMotores(25, 25);
+        break;
+
+    case ATAQUE_IR_LENTOD:
+
+        digitalWrite(Pino_Transistor, LOW);
+        transistor = Desligado;
+
+        // Se perder o alvo de vista, volta a girar e buscar
+        if (valorReceptorF == LOW && valorReceptorE == LOW && valorReceptorD == LOW)
+        {
+            alvoAlinhado = false; // Reseta o estado de alinhamento
+            EstadoD = BUSCA_GIRANDO;
+            break;
+        }
+
+        // Lógica de Alinhamento e Avanço com Espera
+        if (valorReceptorF == HIGH)
+        {
+            if (!alvoAlinhado)
+            {
+                tempoAlinhamento = millis(); // Começa a contar o tempo
+                alvoAlinhado = true;
+            }
+
+            else if ((millis() - tempoAlinhamento >= 300) && (millis() - tempoAlinhamento < 15000))
+            {
+                if (valorReceptorE == HIGH)
+                {
+                    moverMotores(20, 40);
+                }
+                else if (valorReceptorD == HIGH)
+                {
+                    moverMotores(40, 20);
+                }
+                else
+                {
+                    moverMotores(30, 30);
+                }
+            }
+            else if (millis() - tempoAlinhamento >= 15000)
+            {
+                moverMotores(255, 255);
+            }
+            else
+            {
+                moverMotores(0, 0);
+            }
+        }
+        else
+        {
+            alvoAlinhado = false; // O alvo saiu da frente, zera o cronômetro
+
+            if (valorReceptorE == HIGH)
+            {
+                moverMotores(-100, 100);
+            }
+            else if (valorReceptorD == HIGH)
+            {
+                moverMotores(100, -100);
+            }
+        }
+
+        break;
+
+    case ATAQUE_JSUMO_LENTOD:
+
+        digitalWrite(Pino_Transistor, HIGH);
+        transistor = Ligado;
+
+        // Se perder o alvo de vista, desliga o Jsumo e volta a buscar
+        if (valorJsumoF == LOW && valorJsumoE == LOW && valorJsumoD == LOW)
+        {
+            digitalWrite(Pino_Transistor, LOW);
+            transistor = Desligado;
+            jsumoEmPulso = false;
+            tempoCicloJsumo = millis();
+            alvoAlinhado = false; // Reseta o estado de alinhamento
+            EstadoD = BUSCA_GIRANDO;
+            break;
+        }
+
+        // Lógica de Alinhamento e Avanço com Espera
+        if (valorJsumoF == HIGH)
+        {
+            if (!alvoAlinhado)
+            {
+                tempoAlinhamento = millis(); // Começa a contar o tempo
+                alvoAlinhado = true;
+            }
+
+            else if ((millis() - tempoAlinhamento >= 300) && (millis() - tempoAlinhamento < 15000))
+            {
+                if (valorJsumoE == HIGH)
+                {
+                    moverMotores(20, 40);
+                }
+                else if (valorJsumoD == HIGH)
+                {
+                    moverMotores(40, 20);
+                }
+                else
+                {
+                    moverMotores(30, 30);
+                }
+            }
+
+            else if (millis() - tempoAlinhamento >= 15000)
+            {
+                moverMotores(255, 255);
+            }
+            else
+            {
+                moverMotores(0, 0);
+            }
+        }
+        else // Caso pare de ver com o sensor do meio:
+        {
+            alvoAlinhado = false; // O alvo saiu da frente, zera o cronômetro
+
+            if (valorJsumoE == HIGH)
+            {
+                moverMotores(-100, 100);
+            }
+            else if (valorJsumoD == HIGH)
+            {
+                moverMotores(100, -100);
+            }
+        }
+
+        break;
+    }
+}
+
+
 
 //=======================================|| BUSCA SÓ COM IR || ============================================
 
@@ -486,6 +672,8 @@ void buscaIR()
     }
 }
 
+#pragma region Busca Defensiva
+
 void buscaDefensiva() // Essa é a que você procura, Giovanni
 {
 
@@ -559,14 +747,30 @@ void buscaDefensiva() // Essa é a que você procura, Giovanni
                 alvoAlinhado = true;
             }
 
-            if ((millis() - tempoAlinhamento >= 200) && (millis() - tempoAlinhamento < 1000))
+            else if ((millis() - tempoAlinhamento >= 300) && (millis() - tempoAlinhamento < 1000))
             {
-                moverMotores(50, 50);
+                if (valorReceptorE == HIGH)
+                {
+                    moverMotores(30, 50);
+                }
+                else if (valorReceptorD == HIGH)
+                {
+                    moverMotores(50, 30);
+                }
+                else
+                {
+                    moverMotores(40, 40);
+                }
             }
 
-            else if (millis() - tempoAlinhamento >= 1000)
+            else if ((millis() - tempoAlinhamento >= 1000) && (millis() - tempoAlinhamento < 1500))
             {
                 moverMotores(127, 127);
+            }
+
+            else if (millis() - tempoAlinhamento >= 1500)
+            {
+                moverMotores(255, 255);
             }
             else
             {
@@ -579,11 +783,11 @@ void buscaDefensiva() // Essa é a que você procura, Giovanni
 
             if (valorReceptorE == HIGH)
             {
-                moverMotores(-70, 70);
+                moverMotores(-100, 100);
             }
             else if (valorReceptorD == HIGH)
             {
-                moverMotores(70, -70);
+                moverMotores(100, -100);
             }
         }
 
@@ -615,23 +819,23 @@ void buscaDefensiva() // Essa é a que você procura, Giovanni
                 alvoAlinhado = true;
             }
 
-            else if ((millis() - tempoAlinhamento >= 200) && (millis() - tempoAlinhamento < 600))
+            else if ((millis() - tempoAlinhamento >= 300) && (millis() - tempoAlinhamento < 700))
             {
                 if (valorJsumoE == HIGH)
                 {
-                    moverMotores(55, 85);
+                    moverMotores(45, 75);
                 }
                 else if (valorJsumoD == HIGH)
                 {
-                    moverMotores(85, 55);
+                    moverMotores(75, 45);
                 }
                 else
                 {
-                    moverMotores(70, 70);
+                    moverMotores(60, 60);
                 }
             }
 
-            else if ((millis() - tempoAlinhamento >= 600) && (millis() - tempoAlinhamento < 1200))
+            else if ((millis() - tempoAlinhamento >= 700) && (millis() - tempoAlinhamento < 1200))
             {
                 moverMotores(127, 127);
             }
