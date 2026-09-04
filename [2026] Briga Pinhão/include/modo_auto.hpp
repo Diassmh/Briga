@@ -58,6 +58,7 @@ void mostrarMenu()
     SerialBT.println(" S     : Debug Sensores (Reset p/ sair)");
     SerialBT.println(" R     : Debug IR");
     SerialBT.println(" j     : Debug Pisca J sumo");
+    SerialBT.println(" P     : Debug fotoresistor/LDR (Reset p/ sair)"); 
     SerialBT.println(" h     : Mostrar Menu");
     SerialBT.println("======================================\n");
 }
@@ -182,7 +183,7 @@ void setupAuto()
                     running_Sensors = true;
                     for (;;)
                     {
-                        SerialBT.printf("ESFREN: %d\nFRENTE: %d\nDIRFRE: %d\n", valorJsumoE, valorJsumoF, valorJsumoD);
+                        SerialBT.printf("ESFREN: %d\nDIRFRE: %d\n", valorJsumoE, valorJsumoD);
                         vTaskDelay(pdMS_TO_TICKS(50));
                     }
                 }
@@ -191,7 +192,7 @@ void setupAuto()
                     running_Sensors = true;
                     for (;;)
                     {
-                        SerialBT.printf("ESQ: %d\nFRENTE: %d\nDIR: %d\n", valorReceptorE, valorReceptorF, valorReceptorD);
+                        SerialBT.printf("ESQ: %d\nDIR: %d\n", valorReceptorE, valorReceptorD);
                         vTaskDelay(pdMS_TO_TICKS(50));
                     }
                 }
@@ -204,6 +205,15 @@ void setupAuto()
                         vTaskDelay(pdMS_TO_TICKS(50));
                     }
                 }
+                else if (BT == 'P') // Comando 'P' para printar o fotoresistor
+                {
+                    running_Sensors = true;
+                    for (;;)
+                    {
+                        SerialBT.printf("pinoLDR: %d\n", valorLDR);
+                        vTaskDelay(pdMS_TO_TICKS(50));
+                    }
+                }    
                 else
                 {
                     if (BT > 48 && BT < 58)
