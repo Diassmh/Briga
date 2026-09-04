@@ -53,7 +53,7 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region PINOS SERVO
 
-#define SERVOMOTOR_PIN 5 // 5
+#define SERVOMOTOR_PIN 26 // 5
 #define SERVO_ANGULO_INICIAL 90
 #define SERVO_FREQ_HZ 50
 #define SERVO_RESOLUTION 16
@@ -82,14 +82,13 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region SENSOREAMENTO
 
-#define jSumoD 39
-#define jSumoE 36
-#define receptorF 4
-#define receptorD 27
+#define jSumoD 15
+#define jSumoE 14
+#define receptorD 5
 #define receptorE 23
-#define linhaE 34
-#define linhaD 35
-#define pinoLDR 13
+#define linhaE 36
+#define linhaD 39
+#define pinoLDR 34
 
 #pragma endregion
 
