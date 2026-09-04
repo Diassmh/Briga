@@ -33,9 +33,11 @@ void config()
     // --- SENSORES ---
     pinMode(jSumoE, INPUT);
     pinMode(jSumoD, INPUT);
-    pinMode(receptorF, INPUT);
     pinMode(receptorE, INPUT);
     pinMode(receptorD, INPUT);
+    pinMode(linhaE, INPUT);
+    pinMode(linhaD, INPUT);
+    pinMode(pinoLDR, INPUT);
 
     // --- LEDS e EXTRAS ---
     pinMode(led, OUTPUT);
