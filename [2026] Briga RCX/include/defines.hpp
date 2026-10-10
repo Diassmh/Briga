@@ -44,8 +44,8 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #define Motor_Direito_Positivo 16  // 17    arruela 19
 #define Motor_Direito_Negativo 17  // 16    arruela 18
-#define Motor_Esquerdo_Positivo 19 // 19    arruela 16
-#define Motor_Esquerdo_Negativo 18 // 18   arruela 17
+#define Motor_Esquerdo_Positivo 18 // 19    arruela 16
+#define Motor_Esquerdo_Negativo 19 // 18   arruela 17
 
 #pragma endregion
 
@@ -82,13 +82,13 @@ TaskHandle_t SensorTask; // Avisando o ESP que teremos uma task
 
 #pragma region SENSOREAMENTO
 
-#define jSumoD 27   // 15
-#define jSumoE 23   // 14
-#define receptorD 4 // 5
-#define receptorE 5 // 23
-#define linhaE 39   // 36
-#define linhaD 34   // 39
-#define pinoLDR 36  // 34
+#define jSumoD 27
+#define jSumoE 23
+#define receptorD 4
+#define receptorE 5
+#define linhaE 34
+#define linhaD 36
+#define pinoLDR 39
 
 #pragma endregion
 
@@ -123,6 +123,13 @@ enum SelecionaBusca
   CornaDefensiva
 };
 
+enum Posicionamento
+{
+  Perto,
+  Medio,
+  Longe
+};
+
 enum EstadoRobo
 {
   BUSCAR,
@@ -142,7 +149,8 @@ enum EstadoRobo
 
 Direction lado = esquerda;
 Bandeira lado_Bandeira = B_Direita;
-SelecionaModo modoSelecionado = ModoAuto;
+SelecionaModo modoSelecionado = NaoSelecionado;
+Posicionamento Posicao = Medio;
 SelecionaBusca ModoBusca = Corna;
 EstadoRobo estadoAtual = AVANCAR_LENTO;
 

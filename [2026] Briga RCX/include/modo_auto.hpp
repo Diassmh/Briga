@@ -32,7 +32,13 @@ void TodosLedsAmarelos()
 void mostrarMenu()
 {
     SerialBT.println("\n========== MENU BRIGA ==========");
-    SerialBT.println("--- ATAQUE ---");
+
+    SerialBT.println("\n--- POSICAO ---");
+    SerialBT.println(" P : Perto");
+    SerialBT.println(" M : Medio");
+    SerialBT.println(" L : Longe");
+
+    SerialBT.println("\n--- ATAQUE ---");
     SerialBT.println(" f : Frentao Progressivo");
     SerialBT.println(" F : Frentao BOLADO");
     SerialBT.println(" b : Costas Simples");
@@ -70,6 +76,9 @@ void checarStatus()
 
     SerialBT.print("Lado: ");
     SerialBT.println(lado == direita ? "Direita" : (lado == esquerda ? "Esquerda" : "Frente"));
+
+    SerialBT.print("Posicionamento: ");
+    SerialBT.println(Posicao == Perto ? "Perto" : (Posicao == Medio ? "Medio" : "Longe"));
 
     SerialBT.print("Bandeira: ");
     SerialBT.println(lado_Bandeira == B_Esquerda ? "Esquerda" : "Direita");
@@ -145,6 +154,20 @@ void setupAuto()
                 else if (BT == '=')
                 {
                     lado = frente;
+                }
+
+                // LEITURA DA POSIÇÃO
+                else if (BT == 'P')
+                {
+                    Posicao = Perto;
+                }
+                else if (BT == 'M')
+                {
+                    Posicao = Medio;
+                }
+                else if (BT == 'L')
+                {
+                    Posicao = Longe;
                 }
 
                 else if (BT == 'l')
@@ -314,6 +337,7 @@ void setupAuto()
         vTaskDelay(pdMS_TO_TICKS(5));
     }
 #pragma endregion
+
 #pragma region Estrategias
     //=============================|| COMEÇO DE LUTA ||================================
     TodosLedsAmarelos();
@@ -334,6 +358,22 @@ void setupAuto()
         {
             servoBandeira.write(90);
         }
+    }
+
+    // Lógica do multiplicador com base na posição
+    float multDist = 1.0;
+
+    if (Posicao == Perto)
+    {
+        multDist = 0.7; // Corta o tempo de avanço
+    }
+    else if (Posicao == Medio)
+    {
+        multDist = 1.0; // Mantém os tempos originais
+    }
+    else if (Posicao == Longe)
+    {
+        multDist = 1.6; // Aumenta o tempo para cruzar o dohyo
     }
 
     // Execução de movimentação inicial:
@@ -360,23 +400,21 @@ void setupAuto()
         moverMotores(228, 228);
         delay(12);
         moverMotores(255, 255);
-        delay(90);
+        delay(int(90 * multDist));
         break;
 
     case 'F': // Frentão Anti Pescador 1/2 dohyo
-
         SerialBT.print("FRENTAO BOLADO");
         moverMotores(255, 255);
-        delay(250);
+        delay(int(250 * multDist));
         break;
 
     case 'b': // Costas Simples
-
         SerialBT.print("COSTAS SIMPLES");
         if (lado == frente)
         {
             moverMotores(-255, -255);
-            delay(150);
+            delay(int(150 * multDist));
             moverMotores(0, 0);
             delay(10);
             break;
@@ -384,11 +422,11 @@ void setupAuto()
         else if (lado == esquerda)
         {
             moverMotores(-255, -255);
-            delay(70);
+            delay(int(70 * multDist));
             moverMotores(255, -255);
             delay(50);
             moverMotores(-255, -255);
-            delay(80);
+            delay(int(80 * multDist));
             moverMotores(0, 0);
             delay(15);
             lado = direita;
@@ -397,23 +435,23 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(-255, -255);
-            delay(70);
+            delay(int(70 * multDist));
             moverMotores(-255, 255);
             delay(50);
             moverMotores(-255, -255);
-            delay(80);
+            delay(int(80 * multDist));
             moverMotores(0, 0);
             delay(15);
             lado = direita;
+            break;
         }
 
     case 'B': // Costas Ofensiva
-
-        SerialBT.print("COSTAS");
+        SerialBT.print("COSTAS OFENSIVA");
         if (lado == frente)
         {
             moverMotores(-255, -255);
-            delay(150);
+            delay(int(150 * multDist));
             moverMotores(0, 0);
             delay(10);
             break;
@@ -421,13 +459,13 @@ void setupAuto()
         else if (lado == esquerda)
         {
             moverMotores(-255, -255);
-            delay(120);
+            delay(int(120 * multDist));
             moverMotores(-255, 255);
             delay(50);
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, 255);
-            delay(160);
+            delay(int(160 * multDist));
             moverMotores(0, 0);
             delay(10);
             lado = direita;
@@ -436,11 +474,11 @@ void setupAuto()
         else if (lado == direita)
         {
             moverMotores(-255, -255);
-            delay(120);
+            delay(int(120 * multDist));
             moverMotores(255, -255);
             delay(50);
             moverMotores(255, 255);
-            delay(160);
+            delay(int(160 * multDist));
             moverMotores(0, 0);
             delay(10);
             lado = esquerda;
@@ -448,15 +486,13 @@ void setupAuto()
         }
 
     case 'c': // Curva Leve
-
         SerialBT.print("CURVA LEVE");
-
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
             delay(60);
             moverMotores(255, 255);
-            delay(120);
+            delay(int(120 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, -255);
@@ -471,7 +507,7 @@ void setupAuto()
             moverMotores(255, -255);
             delay(60);
             moverMotores(255, 255);
-            delay(120);
+            delay(int(120 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(-255, 255);
@@ -483,21 +519,19 @@ void setupAuto()
         }
 
     case 'C': // Curva Pesada
-
         SerialBT.print("CURVA PESADA");
-
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
             delay(60);
             moverMotores(255, 255);
-            delay(170);
+            delay(int(170 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, -255);
             delay(50);
             moverMotores(255, 255);
-            delay(50);
+            delay(int(50 * multDist));
             moverMotores(0, 0);
             delay(10);
             lado = direita;
@@ -508,23 +542,24 @@ void setupAuto()
             moverMotores(255, -255);
             delay(60);
             moverMotores(255, 255);
-            delay(170);
+            delay(int(170 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(-255, 255);
             delay(50);
             moverMotores(255, 255);
-            delay(50);
+            delay(int(50 * multDist));
             moverMotores(0, 0);
             delay(10);
             lado = esquerda;
             break;
         }
+
     case 'z': // Basico
         SerialBT.print("Basico");
         break;
 
-    case 'e': // desempate
+    case 'e': // Desempate
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
@@ -537,13 +572,14 @@ void setupAuto()
             delay(140);
             break;
         }
-    case 'v': // movimento em V
+
+    case 'v': // Movimento em V
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
             delay(40);
             moverMotores(255, 255);
-            delay(160);
+            delay(int(160 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, -255);
@@ -551,7 +587,7 @@ void setupAuto()
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, 255);
-            delay(180);
+            delay(int(180 * multDist));
             lado = direita;
             break;
         }
@@ -560,7 +596,7 @@ void setupAuto()
             moverMotores(255, -255);
             delay(40);
             moverMotores(255, 255);
-            delay(160);
+            delay(int(160 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(-255, 255);
@@ -568,18 +604,18 @@ void setupAuto()
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, 255);
-            delay(180);
+            delay(int(180 * multDist));
             lado = esquerda;
             break;
         }
-    case 'a': // Aquele lá
 
+    case 'a': // Aquele lá
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
             delay(60);
             moverMotores(255, 255);
-            delay(110);
+            delay(int(110 * multDist));
             moverMotores(0, 0);
             delay(20);
             moverMotores(255, -255);
@@ -593,7 +629,7 @@ void setupAuto()
             moverMotores(255, -255);
             delay(60);
             moverMotores(255, 255);
-            delay(110);
+            delay(int(110 * multDist));
             moverMotores(0, 0);
             delay(20);
             moverMotores(-255, 255);
@@ -603,13 +639,13 @@ void setupAuto()
             break;
         }
 
-    case 'd': // diagonal
+    case 'd': // Diagonal
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
             delay(60);
             moverMotores(255, 255);
-            delay(150);
+            delay(int(150 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(255, -255);
@@ -622,7 +658,7 @@ void setupAuto()
             moverMotores(255, -255);
             delay(60);
             moverMotores(255, 255);
-            delay(150);
+            delay(int(150 * multDist));
             moverMotores(0, 0);
             delay(10);
             moverMotores(-255, 255);
@@ -630,7 +666,8 @@ void setupAuto()
             lado = esquerda;
             break;
         }
-    case 'g': // giro 45°
+
+    case 'g': // Giro 45°
         if (lado == esquerda)
         {
             moverMotores(-255, 255);
@@ -651,7 +688,6 @@ void setupAuto()
         }
 
     case 'j':
-
         while (true)
         {
             moverMotores(255, 255);
